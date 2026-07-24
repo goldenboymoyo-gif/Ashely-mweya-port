@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ashley Mwiya — Portfolio Admin</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F3EC; --surface: #fff; --surface2: #EFEAE1; --border: #D9D5CC;
+    --text: #121212; --text-dim: #8A8580; --accent: #FF5A1F; --accent-hover: #D6430C;
+    --green: #22c55e; --red: #ef4444; --yellow: #eab308;
+    --radius: 10px; --radius-sm: 6px;
+  }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* LOGIN */
+  .login-wrap {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 24px;
+  }
+  .login-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 48px 40px; width: 100%; max-width: 380px;
+    text-align: center;
+  }
+  .login-box h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .login-box .sub { color: var(--text-dim); font-size: 13px; margin-bottom: 28px; }
+  .login-box input {
+    width: 100%; padding: 12px 16px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface2); color: var(--text);
+    font-size: 15px; outline: none; transition: border 0.2s;
+  }
+  .login-box input:focus { border-color: var(--accent); }
+  .login-box button {
+    width: 100%; padding: 12px; border-radius: var(--radius-sm); border: none;
+    background: var(--accent); color: #fff; font-size: 15px; font-weight: 600;
+    cursor: pointer; margin-top: 12px; transition: background 0.2s;
+  }
+  .login-box button:hover { background: var(--accent-hover); }
+  .login-err { color: var(--red); font-size: 13px; margin-top: 10px; display: none; }
+
+  /* DASHBOARD */
+  .dashboard { display: none; }
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 32px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-left .logo { font-weight: 700; font-size: 16px; }
+  .topbar-left .badge {
+    font-size: 11px; background: var(--accent); color: #fff;
+    padding: 2px 8px; border-radius: 99px; font-weight: 600;
+  }
+  .topbar-right { display: flex; gap: 10px; }
+  .btn {
+    padding: 8px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { border-color: var(--text-dim); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-danger { background: var(--red); border-color: var(--red); color: #fff; }
+  .btn-danger:hover { opacity: 0.85; }
+  .btn-success { background: var(--green); border-color: var(--green); color: #fff; }
+
+  .layout { display: flex; min-height: calc(100vh - 60px); }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px; min-width: 220px; background: var(--surface);
+    border-right: 1px solid var(--border); padding: 20px 0;
+    position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto;
+  }
+  .sidebar a {
+    display: block; padding: 10px 24px; color: var(--text-dim);
+    text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .sidebar a:hover { color: var(--text); background: var(--surface2); }
+  .sidebar a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(255,90,31,0.08); }
+  .sidebar .sep { padding: 4px 24px; margin-top: 16px; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+
+  /* CONTENT */
+  .content { flex: 1; padding: 32px 40px 60px; max-width: 860px; }
+  .section-header { margin-bottom: 28px; }
+  .section-header h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .section-header p { color: var(--text-dim); font-size: 14px; }
+
+  .field { margin-bottom: 22px; }
+  .field label {
+    display: block; font-size: 13px; font-weight: 600; color: var(--text-dim);
+    margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .field input, .field textarea {
+    width: 100%; padding: 10px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface2); color: var(--text);
+    font-size: 14px; font-family: inherit; outline: none; transition: border 0.2s;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+  .field .hint { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px;
+  }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .card-header h3 { font-size: 15px; font-weight: 600; }
+  .card .field:last-child { margin-bottom: 0; }
+  .remove-btn {
+    background: none; border: none; color: var(--red); cursor: pointer;
+    font-size: 12px; font-weight: 500; padding: 4px 8px; border-radius: var(--radius-sm);
+    transition: background 0.15s;
+  }
+  .remove-btn:hover { background: rgba(239,68,68,0.12); }
+  .add-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 18px; border-radius: var(--radius-sm); border: 1px dashed var(--border);
+    background: transparent; color: var(--accent); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; margin-top: 4px;
+  }
+  .add-btn:hover { border-color: var(--accent); background: rgba(255,90,31,0.06); }
+
+  .toast {
+    position: fixed; bottom: 28px; right: 28px;
+    padding: 14px 24px; border-radius: var(--radius);
+    font-size: 14px; font-weight: 500; z-index: 999;
+    transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: var(--green); color: #fff; }
+  .toast.error { background: var(--red); color: #fff; }
+
+  .preview-frame {
+    position: fixed; top: 0; right: 0; width: 50vw; height: 100vh;
+    border: none; z-index: 200; display: none; box-shadow: -4px 0 40px rgba(0,0,0,0.15);
+    background: var(--bg);
+  }
+  .preview-frame.open { display: block; }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .content { padding: 20px; }
+    .field-row { grid-template-columns: 1fr; }
+    .topbar { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <h1>Portfolio Admin</h1>
+    <p class="sub">Ashley Mwiya — Digital Marketing Portfolio</p>
+    <input type="password" id="loginPass" placeholder="Enter admin password" autocomplete="off">
+    <button onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="loginErr">Wrong password. Try again.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="logo">Ashley Mwiya</span>
+      <span class="badge">Admin</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn" onclick="togglePreview()">Preview</button>
+      <button class="btn btn-primary" onclick="saveAll()">Save Changes</button>
+      <button class="btn btn-danger" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <a href="#" class="active" data-tab="hero">Hero</a>
+      <a href="#" data-tab="about">About</a>
+      <a href="#" data-tab="facts">Quick Facts</a>
+      <div class="sep">Portfolio</div>
+      <a href="#" data-tab="credentials">Credentials</a>
+      <a href="#" data-tab="work">Work</a>
+      <a href="#" data-tab="services">Services</a>
+      <div class="sep">Extras</div>
+      <a href="#" data-tab="canva">Canva Work</a>
+      <div class="sep">Connect</div>
+      <a href="#" data-tab="contact">Contact</a>
+      <a href="#" data-tab="contactinfo">Contact Info</a>
+      <a href="#" data-tab="footer">Footer</a>
+    </nav>
+
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<iframe class="preview-frame" id="previewFrame"></iframe>
+<div class="toast" id="toast"></div>
+
+<script>
+let token = null;
+let data = {};
+let dirty = false;
+
+/* AUTH */
+async function doLogin() {
+  const pass = document.getElementById('loginPass').value;
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ password: pass })
+    });
+    if (!r.ok) throw 0;
+    const j = await r.json();
+    token = j.token;
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    await loadPortfolio();
+  } catch(e) {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function doLogout() {
+  token = null;
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+}
+
+async function loadPortfolio() {
+  const r = await fetch('/api/portfolio', { headers: { 'Authorization': 'Bearer ' + token } });
+  data = await r.json();
+  renderTab('hero');
+}
+
+/* NAVIGATION */
+document.querySelectorAll('.sidebar a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    if (dirty && !confirm('You have unsaved changes. Discard them?')) return;
+    document.querySelectorAll('.sidebar a').forEach(x => x.classList.remove('active'));
+    a.classList.add('active');
+    renderTab(a.dataset.tab);
+  });
+});
+
+/* SAVE */
+async function saveAll() {
+  collectCurrentTab();
+  try {
+    const r = await fetch('/api/portfolio', {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!r.ok) throw 0;
+    dirty = false;
+    toast('Changes saved!', 'success');
+  } catch(e) {
+    toast('Failed to save. Try again.', 'error');
+  }
+}
+
+/* PREVIEW */
+function togglePreview() {
+  const f = document.getElementById('previewFrame');
+  if (f.classList.contains('open')) { f.classList.remove('open'); return; }
+  collectCurrentTab();
+  fetch('/api/portfolio', {
+    method: 'PUT',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).then(() => {
+    f.src = '/api/preview?t=' + Date.now();
+    f.classList.add('open');
+  });
+}
+
+/* TOAST */
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type;
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* COLLECT - reads current form inputs back into data */
+let currentTab = null;
+function collectCurrentTab() {
+  if (!currentTab) return;
+  const c = document.getElementById('content');
+  const inputs = c.querySelectorAll('[data-key]');
+  inputs.forEach(inp => {
+    const [section, key, idx] = inp.dataset.key.split('.');
+    if (section === 'hero' || section === 'about' || section === 'contactInfo' || section === 'footer') {
+      if (section === 'about' && key === 'paragraphs') {
+        data[section][key] = inp.value.split('\n').filter(p => p.trim());
+      } else if (section === 'contactInfo') {
+        if (!data[section]) data[section] = {};
+        data[section][key] = inp.value;
+      } else {
+        data[section][key] = inp.value;
+      }
+    } else if (section === 'credentials' || section === 'work' || section === 'services' || section === 'canva') {
+      const i = parseInt(idx);
+      if (key === 'items' || key === 'certs' || key === 'links') {
+        const sub = inp.dataset.subkey;
+        if (!data[section][key][i]) data[section][key][i] = {};
+        data[section][key][i][sub] = inp.value;
+      }
+    } else if (section === 'facts') {
+      if (!data.facts) data.facts = {};
+      data.facts[key] = inp.value;
+    }
+  });
+}
+
+/* RENDER */
+function renderTab(tab) {
+  collectCurrentTab();
+  currentTab = tab;
+  dirty = false;
+  const c = document.getElementById('content');
+  const renderers = { hero, about, facts, credentials, work, services, canva, contact, contactinfo, footer };
+  c.innerHTML = (renderers[tab] || (() => ''))();
+  c.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', () => dirty = true));
+  c.scrollTop = 0;
+}
+
+function h(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function hero() {
+  return `
+    <div class="section-header"><h2>Hero Section</h2><p>Top of the page — first impression</p></div>
+    <div class="field"><label>Eyebrow Text</label><input data-key="hero.eyebrow" value="${h(data.hero?.eyebrow || '')}"></div>
+    <div class="field"><label>Tagline</label><input data-key="hero.heroSub" value="${h(data.hero?.heroSub || '')}"></div>
+    <div class="field"><label>Scribble Text</label><input data-key="hero.heroScribble" value="${h(data.hero?.heroScribble || '')}"></div>
+  `;
+}
+
+function about() {
+  const paras = data.about?.paragraphs?.join('\n') || '';
+  return `
+    <div class="section-header"><h2>About Section</h2><p>Introduction and biography</p></div>
+    <div class="field"><label>About Headline</label><input data-key="about.headline" value="${h(data.about?.headline || '')}"></div>
+    <div class="field"><label>Bio Paragraphs</label><textarea data-key="about.paragraphs" rows="8">${h(paras)}</textarea><div class="hint">One paragraph per line</div></div>
+  `;
+}
+
+function facts() {
+  return `
+    <div class="section-header"><h2>Quick Facts</h2><p>Focus, Industries, Toolkit</p></div>
+    <div class="field"><label>Focus</label><input data-key="facts.focus" value="${h(data.facts?.focus || '')}"></div>
+    <div class="field"><label>Industries</label><input data-key="facts.industries" value="${h(data.facts?.industries || '')}"></div>
+    <div class="field"><label>Toolkit</label><input data-key="facts.toolkit" value="${h(data.facts?.toolkit || '')}"></div>
+  `;
+}
+
+function credentials() {
+  let cards = '';
+  (data.credentials?.certs || []).forEach((c, i) => {
+    cards += `
+      <div class="card">
+        <div class="card-header"><h3>Certification ${i+1}</h3>
+          <button class="remove-btn" onclick="removeItem('credentials','certs',${i})">Remove</button>
+        </div>
+        <div class="field"><label>Issuer</label><input data-key="credentials.certs.${i}.issuer" data-subkey="issuer" value="${h(c.issuer || '')}"></div>
+        <div class="field"><label>Name</label><input data-key="credentials.certs.${i}.name" data-subkey="name" value="${h(c.name || '')}"></div>
+      </div>`;
+  });
+  return `
+    <div class="section-header"><h2>Credentials</h2><p>Certifications and qualifications</p></div>
+    <div class="field"><label>Section Headline</label><input data-key="credentials.headline" value="${h(data.credentials?.headline || '')}"></div>
+    ${cards}
+    <button class="add-btn" onclick="addItem('credentials','certs',{issuer:'',name:''})">+ Add Certification</button>
+  `;
+}
+
+function work() {
+  let cards = '';
+  (data.work?.items || []).forEach((w, i) => {
+    cards += `
+      <div class="card">
+        <div class="card-header"><h3>Work ${i+1}</h3>
+          <button class="remove-btn" onclick="removeItem('work','items',${i})">Remove</button>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Type</label><input data-key="work.items.${i}.type" data-subkey="type" value="${h(w.type || '')}"></div>
+          <div class="field"><label>Title</label><input data-key="work.items.${i}.title" data-subkey="title" value="${h(w.title || '')}"></div>
+        </div>
+        <div class="field"><label>Description</label><textarea data-key="work.items.${i}.description" data-subkey="description" rows="2">${h(w.description || '')}</textarea></div>
+      </div>`;
+  });
+  return `
+    <div class="section-header"><h2>Selected Work</h2><p>Showcase projects and results</p></div>
+    <div class="field"><label>Section Headline</label><input data-key="work.headline" value="${h(data.work?.headline || '')}"></div>
+    <div class="field"><label>Section Note</label><input data-key="work.note" value="${h(data.work?.note || '')}"></div>
+    ${cards}
+    <button class="add-btn" onclick="addItem('work','items',{type:'',title:'',description:''})">+ Add Project</button>
+  `;
+}
+
+function services() {
+  let cards = '';
+  (data.services?.items || []).forEach((s, i) => {
+    cards += `
+      <div class="card">
+        <div class="card-header"><h3>Service ${i+1}</h3>
+          <button class="remove-btn" onclick="removeItem('services','items',${i})">Remove</button>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Service Name</label><input data-key="services.items.${i}.name" data-subkey="name" value="${h(s.name || '')}"></div>
+          <div class="field"><label>Tag / Category</label><input data-key="services.items.${i}.tag" data-subkey="tag" value="${h(s.tag || '')}"></div>
+        </div>
+      </div>`;
+  });
+  return `
+    <div class="section-header"><h2>Services</h2><p>What you offer to clients</p></div>
+    <div class="field"><label>Section Headline</label><input data-key="services.headline" value="${h(data.services?.headline || '')}"></div>
+    <div class="field"><label>Section Note</label><input data-key="services.note" value="${h(data.services?.note || '')}"></div>
+    ${cards}
+    <button class="add-btn" onclick="addItem('services','items',{name:'',tag:''})">+ Add Service</button>
+  `;
+}
+
+function canva() {
+  let cards = '';
+  (data.canva?.links || []).forEach((l, i) => {
+    cards += `
+      <div class="card">
+        <div class="card-header"><h3>Link ${i+1}</h3>
+          <button class="remove-btn" onclick="removeItem('canva','links',${i})">Remove</button>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Title</label><input data-key="canva.links.${i}.title" data-subkey="title" value="${h(l.title || '')}"></div>
+          <div class="field"><label>Canva URL</label><input data-key="canva.links.${i}.url" data-subkey="url" value="${h(l.url || '')}"></div>
+        </div>
+        <div class="field"><label>Description</label><input data-key="canva.links.${i}.description" data-subkey="description" value="${h(l.description || '')}"></div>
+      </div>`;
+  });
+  return `
+    <div class="section-header"><h2>Canva Work</h2><p>Links to your Canva portfolio pieces</p></div>
+    <div class="field"><label>Section Headline</label><input data-key="canva.headline" value="${h(data.canva?.headline || '')}"></div>
+    <div class="field"><label>Section Note</label><input data-key="canva.note" value="${h(data.canva?.note || '')}"></div>
+    ${cards}
+    <button class="add-btn" onclick="addItem('canva','links',{title:'',description:'',url:''})">+ Add Link</button>
+  `;
+}
+
+function contact() {
+  return `
+    <div class="section-header"><h2>Contact Section</h2><p>Contact form headline and intro</p></div>
+    <div class="field"><label>Section Headline</label><textarea data-key="contact.headline" rows="2">${h(data.contact?.headline || '')}</textarea></div>
+    <div class="field"><label>Intro Text</label><input data-key="contact.lead" value="${h(data.contact?.lead || '')}"></div>
+  `;
+}
+
+function contactinfo() {
+  return `
+    <div class="section-header"><h2>Contact Details</h2><p>Phone, email, TikTok, location</p></div>
+    <div class="field-row">
+      <div class="field"><label>Phone Number</label><input data-key="contactInfo.phone" value="${h(data.contactInfo?.phone || '')}"></div>
+      <div class="field"><label>Email Address</label><input data-key="contactInfo.email" value="${h(data.contactInfo?.email || '')}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>TikTok URL</label><input data-key="contactInfo.tiktok" value="${h(data.contactInfo?.tiktok || '')}"></div>
+      <div class="field"><label>Location</label><input data-key="contactInfo.location" value="${h(data.contactInfo?.location || '')}"></div>
+    </div>
+  `;
+}
+
+function footer() {
+  return `
+    <div class="section-header"><h2>Footer</h2><p>Bottom of the page</p></div>
+    <div class="field"><label>Footer Note</label><input data-key="footer" value="${h(data.footer || '')}"></div>
+  `;
+}
+
+/* ADD / REMOVE items */
+function addItem(section, key, template) {
+  collectCurrentTab();
+  if (!data[section][key]) data[section][key] = [];
+  data[section][key].push({...template});
+  renderTab(currentTab);
+  dirty = true;
+}
+function removeItem(section, key, idx) {
+  collectCurrentTab();
+  data[section][key].splice(idx, 1);
+  renderTab(currentTab);
+  dirty = true;
+}
+</script>
+</body>
+</html>
