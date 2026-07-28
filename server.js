@@ -5,7 +5,7 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = 3000;
-const HTML_FILE = path.join(__dirname, 'ashley-mwiya-portfolio (1).html');
+const HTML_FILE = path.join(__dirname, 'index.html');
 const SESSION_SECRET = crypto.randomBytes(32).toString('hex');
 const ADMIN_PASSWORD = 'ashley2024';
 
